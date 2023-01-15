@@ -1,19 +1,5 @@
-# Tag : Rules 
-
-# The Params are 
-# pair<string,string> scan(const std::string &str,int &pos) pair<string,string> tag and content
-
-[user_match,'\"'] = {
-    pos++;
-    string ret;
-    map<string,char> indent_char; .... 
-}
-[user_match,'\''] = {
-
-}
-
-
 NUMBER: [0-9]+$
-REAL: [0-9]+.[0-9][0-9]*$
-SYMBOL:  [_a-zA-Z][_a-zA-Z0-9]+$   
-DOT: .$
+SYMBOL: [_a-zA-Z][_a-zA-Z0-9]*$
+REAL:[0-9]+.[0-9]+$
+DOT:.$
+SPACE: \s$

@@ -6,7 +6,7 @@ namespace Alg
     using std::cout;
     using std::pair;
     namespace
-    {
+    { // tab is fin_state_tab, to distinct some different tag fin states.
         vector<DS::BitSet> split_states(std::vector<pair<int, int>> &vec)
         {
             vector<DS::BitSet> ret(1);
@@ -27,7 +27,7 @@ namespace Alg
         void update_states_tab(vector<DS::BitSet> &split_vec,
                                int old_stat_id,
                                int &cur_stat_cnt,
-                               std::unordered_map<DS::BitSet, int,DS::BitSetHash> &new_states_tab,
+                               std::unordered_map<DS::BitSet, int, DS::BitSetHash> &new_states_tab,
                                map<int, int> &old_new_tab)
         {
             bool is_first = true;
@@ -48,12 +48,93 @@ namespace Alg
                 cur_stat_cnt++;
             }
         }
+
+        StateTable gen_new_table(unordered_map<DS::BitSet, int, DS::BitSetHash> &new_states_tab,
+                                 vector<map<char_type, int>> &tab,
+                                 map<int, int> &old_new_tab,
+                                 map<int, std::string> &fin_stat_tab,
+                                 int &new_states_cnt,
+                                 int entry)
+        {
+            StateTable ret;
+            ret.tab.resize(new_states_cnt);
+            for (int old_state = 0; old_state < tab.size(); old_state++)
+            {
+                int new_state = old_new_tab[old_state];
+
+                if (fin_stat_tab.count(old_state))
+                    ret.fin_stat_tab.insert({new_state, fin_stat_tab[old_state]});
+                if (old_state == entry)
+                    ret.entry = new_state;
+                for (auto [ch, dest] : tab[old_state])
+                {
+#ifdef CHECK_INTERNAL_ERROR
+                    if (ret.tab[new_state].count(ch) && ret.tab[new_state][ch] != old_new_tab[dest])
+                    {
+                        std::cerr << "trim_tab(): internal error, algorithm is contradictory!\n";
+                        exit(1);
+                    }
+#endif
+                    ret.tab[new_state][ch] = old_new_tab[dest];
+                }
+            }
+        }
+
+        void split_different_tag(unordered_map<DS::BitSet, int, DS::BitSetHash> &new_states_tab,
+                                 map<int, int> &old_new_tab,
+                                 map<int, std::string> &fin_stat_tab,
+                                 int &new_states_cnt)
+        {
+            vector<DS::BitSet> need_to_erase;
+            vector<pair<DS::BitSet, int>> need_to_insert;
+
+            for (auto [key, id] : new_states_tab)
+            {
+                DS::BitSet cur_set = key;
+                auto vec = cur_set.to_vector();
+
+                std::map<std::string, DS::BitSet> tag_mp;
+
+                for (auto i : vec)
+                {
+                    if (fin_stat_tab.count(i) && fin_stat_tab[i] != "")
+                    {
+                        tag_mp[fin_stat_tab[i]].insert(i);
+                        cur_set.erase(i);
+                    }
+                }
+                if (tag_mp.size() >= 2)
+                {
+                    need_to_erase.push_back(key);
+                    bool first = true;
+                    for (auto [k, v] : tag_mp)
+                    {
+                        if (first)
+                        {
+                            cur_set |= v;
+                            need_to_insert.push_back({cur_set, id}), first = false;
+                        }
+                        else
+                            need_to_insert.push_back({v, new_states_cnt++});
+                    }
+                }
+            }
+            for (auto it : need_to_erase)
+                new_states_tab.erase(it);
+            for (auto it : need_to_insert)
+            {
+                auto vec = it.first.to_vector();
+                for (auto s : vec)
+                    old_new_tab[s] = it.second;
+                new_states_tab.insert(it);
+            }
+        }
     }
 
     StateTable StateTable::trim_tab()
     {
         bool flag = true;
-        unordered_map<DS::BitSet, int,DS::BitSetHash> new_states_tab;
+        unordered_map<DS::BitSet, int, DS::BitSetHash> new_states_tab;
         // init split the states to fin states or non-fin states
 
         // old_state -> new_state
@@ -111,7 +192,8 @@ namespace Alg
                     it++;
             }
         }
-
+        // split the fin state which has different tag
+        split_different_tag(new_states_tab, old_new_tab, fin_stat_tab, new_states_cnt);
         // gen_new_tab
         StateTable ret;
         ret.tab.resize(new_states_cnt);
@@ -120,7 +202,7 @@ namespace Alg
             int new_state = old_new_tab[old_state];
 
             if (this->fin_stat_tab.count(old_state))
-                ret.fin_stat_tab.insert(new_state);
+                ret.fin_stat_tab.insert({new_state, fin_stat_tab[old_state]});
             if (old_state == entry)
                 ret.entry = new_state;
             for (auto [ch, dest] : tab[old_state])
@@ -153,14 +235,14 @@ namespace Test
             tab[1].insert({'i', 4});
             tab[2].insert({'e', 3});
             tab[4].insert({'e', 5});
-            tmp.fin_stat_tab.insert(3);
-            tmp.fin_stat_tab.insert(5);
+            // tmp.fin_stat_tab.insert(3);
+            // tmp.fin_stat_tab.insert(5);
             /*
-            expect output : 
-        0 e-1 
-*       1 
--       2 f-3 
-        3 e-0 i-0 
+            expect output :
+        0 e-1
+*       1
+-       2 f-3
+        3 e-0 i-0
             */
             tmp.trim_tab().print_tab();
         }

@@ -1,9 +1,10 @@
 // #include "../includes/subset-cons.h"
-#include "../includes/re.h"
+#include "../includes/lexer.h"
 
 #include <time.h>
 #include <unordered_map>
 #include <iostream>
+#include <fstream>
 
 namespace Test
 {
@@ -19,20 +20,43 @@ namespace ReParser
         void case1();
     }
 }
+std::string read_file(const std::string &filename)
+{
+    std::ifstream ifs(filename, std::ios::in | std::ios::binary);
+    if (!ifs)
+        throw std::runtime_error("open file " + filename + " failed\n");
+    char *file_content;
+    ifs.seekg(0, std::ios::end);
+    size_t file_length = ifs.tellg();
+    ifs.seekg(0, std::ios::beg);
+
+    file_content = new char[file_length];
+
+    ifs.read(file_content, file_length);
+    ifs.close();
+
+    std::string str(file_content, file_content + file_length);
+    delete[] file_content;
+    return str;
+}
+
 int main()
 {
     using namespace Alg;
-    using namespace Htto;
-
+    freopen("output.txt", "w",stdout);
     time_t s = clock();
+    std::string file = read_file("./rules.hlex");
+    Lexer::Scanner scan(file);
+    Lexer::LexerGenerator L(scan);
 
-    ReExpr regex("[A-Za-z]+-[A-Za-z]+");
-    
-    auto res = regex.match("Hello-Now is 2023-01-15 Have a nice day");
-    
-    std::cout << res.start << " " << res.str << "\n";
+    auto vec = L.lex("Hello World . I am Htto from M 9.26 M78 Automan");
+
+    for (auto token : vec)
+    {
+        std::cout << token.to_string();
+    }
 
     time_t e = clock();
-    std::cout << (double)(e - s) / CLOCKS_PER_SEC;
+    // std::cout << (double)(e - s) / CLOCKS_PER_SEC;
     return 0;
 }

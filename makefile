@@ -11,12 +11,12 @@ define COM_INS
 endef
 
 # Dependencies
-main_dep = $(re_dep)  
+main_dep = lexer.h
 subset_cons_dep = subset-cons.h to-nfa.h mbitset.h
 hopcroft_dep = subset-cons.h
 parser_dep = parser.h subset-cons.h
 re_dep = re.h parser.h
-
+lexer_dep = lexer.h parser.h
 all:$(target)
 
 obj/main.o:$(addprefix ./src/, main.cpp) $(addprefix includes/,$(main_dep))
@@ -31,7 +31,9 @@ obj/parser.o: src/parser.cpp $(addprefix includes/, $(parser_dep))
 	$(COM_INS)
 obj/mbitset.o: src/mbitset.cpp 
 	$(COM_INS)
-obj/re.o: src/re.cpp 
+obj/re.o: src/re.cpp $(addprefix includes/, $(re_dep))
+	$(COM_INS)
+obj/lexer.o: src/lexer.cpp $(addprefix includes/, $(lexer_dep))
 	$(COM_INS)
 
 $(target):$(OBJ)

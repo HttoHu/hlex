@@ -11,10 +11,10 @@
  */
 namespace Alg
 {
-    using std::unordered_map;
-    using std::set;
     using std::map;
-    
+    using std::set;
+    using std::unordered_map;
+
     struct StateTable
     {
     public:
@@ -22,10 +22,11 @@ namespace Alg
 
         StateTable trim_tab();
         bool match_whole(const std::string &str);
+        bool is_fin(int s) { return fin_stat_tab.count(s); }
 
     public:
         int entry = 0;
-        set<int> fin_stat_tab;
+        map<int, std::string> fin_stat_tab;
         vector<map<char_type, int>> tab;
     };
     class SubsetAlg
@@ -49,7 +50,7 @@ namespace Alg
 
         // dfs to gen epsilon closure from u
         DS::BitSet epsilon_clo(int u);
-        // gen all state epsilon closure 
+        // gen all state epsilon closure
         void gen_epsilon_tab();
     };
 }

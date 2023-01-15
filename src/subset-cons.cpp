@@ -12,8 +12,8 @@ namespace Alg
             if (i == entry)
                 std::cout << "-";
             if (fin_stat_tab.count(i))
-                std::cout << "*";
-            std::cout << "\t" << i++ << " ";
+                std::cout << "*" << fin_stat_tab[i];
+            std::cout << "\t\t" << i++ << " ";
             for (auto [ch, t] : line)
                 std::cout << ch << "-" << t << " ";
             std::cout << "\n";
@@ -51,12 +51,17 @@ namespace Alg
             // ch -> new DFA state number
             map<char_type, int> trans_id_tab;
             bool is_fin_state = false;
+            std::string fin_state_tag;
 
             auto vec = cur_set.to_vector();
             for (auto node : vec)
             {
                 if (mg.is_end(node))
+                {
                     is_fin_state = true;
+                    if (fin_state_tag == "")
+                        fin_state_tag = mg.node_tab[node]->val;
+                }
 
                 for (auto [v, ch] : mg.ng[node])
                 {
@@ -65,13 +70,8 @@ namespace Alg
                     auto it = trans_tab.find(ch);
                     DS::BitSet tmp_tab = closure_tab[v];
                     if (it == trans_tab.end())
-                    {
                         trans_tab.insert({ch, tmp_tab});
-                        if (!vis.count(tmp_tab))
-                            trans_id_tab.insert({ch, cnt++});
-                        else
-                            trans_id_tab.insert({ch, vis[tmp_tab]});
-                    }
+
                     else
                         it->second |= tmp_tab;
                 }
@@ -80,17 +80,23 @@ namespace Alg
                 ret.tab.resize(id + 1);
 
             if (is_fin_state)
-                ret.fin_stat_tab.insert(id);
-            ret.tab[id] = trans_id_tab;
+                ret.fin_stat_tab.insert({id, fin_state_tag});
 
             for (auto [ch, v] : trans_tab)
             {
                 if (!vis.count(v))
                 {
-                    vis.insert({v, trans_id_tab[ch]});
-                    s.push_back({trans_id_tab[ch], std::move(v)});
+                    vis.insert({v, cnt});
+                    s.push_back({cnt, std::move(v)});
+                    trans_id_tab[ch] = cnt;
+                    cnt++;
+                }
+                else
+                {
+                    trans_id_tab[ch] = vis[v];
                 }
             }
+            ret.tab[id] = trans_id_tab;
         }
         return ret;
     }

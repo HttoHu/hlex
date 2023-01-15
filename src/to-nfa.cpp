@@ -56,6 +56,7 @@ namespace Alg
         Edge *edge = new Edge(false, ch, end);
 
         start->push_edge(edge);
+        end->is_end = true;
         return new Graph(start, end);
     }
     Graph *Graph::concat(Graph *g1, Graph *g2)
