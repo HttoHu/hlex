@@ -44,7 +44,7 @@ some indent chars.
 
 * 实现重复: R* 
 
-![实现重复](.\img\02-tompson-repeat.drawio.png)
+![实现重复](./img/02-tompson-repeat.drawio.png)
 
 如果是正闭包就去掉下面那个 epsilon 飞线就行
 
