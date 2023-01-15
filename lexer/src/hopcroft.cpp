@@ -1,5 +1,5 @@
 #include "../includes/subset-cons.h"
-
+#include "../includes/mbitset.h"
 #define CHECK_INTERNAL_ERROR
 namespace Alg
 {
@@ -7,9 +7,9 @@ namespace Alg
     using std::pair;
     namespace
     {
-        vector<set<int>> split_states(std::vector<pair<int, int>> &vec)
+        vector<DS::BitSet> split_states(std::vector<pair<int, int>> &vec)
         {
-            vector<set<int>> ret(1);
+            vector<DS::BitSet> ret(1);
             sort(vec.begin(), vec.end());
             // two pointers to split different destination by same char.
             int l = 0, r = 1;
@@ -24,15 +24,12 @@ namespace Alg
             }
             return ret;
         }
-        void update_states_tab(vector<set<int>> &split_vec,
+        void update_states_tab(vector<DS::BitSet> &split_vec,
                                int old_stat_id,
                                int &cur_stat_cnt,
-                               map<set<int>, int> &new_states_tab,
+                               std::unordered_map<DS::BitSet, int,DS::BitSetHash> &new_states_tab,
                                map<int, int> &old_new_tab)
         {
-            sort(split_vec.begin(), split_vec.end(), [](auto &a, auto &b)
-                 { return a.size() > b.size(); });
-            // the biggest set remain old set number.
             bool is_first = true;
 
             for (auto new_set : split_vec)
@@ -44,7 +41,9 @@ namespace Alg
                     continue;
                 }
                 new_states_tab.insert({new_set, cur_stat_cnt});
-                for (auto cur_state : new_set)
+
+                auto vec = new_set.to_vector();
+                for (auto cur_state : vec)
                     old_new_tab[cur_state] = cur_stat_cnt;
                 cur_stat_cnt++;
             }
@@ -54,13 +53,13 @@ namespace Alg
     StateTable StateTable::trim_tab()
     {
         bool flag = true;
-        map<set<int>, int> new_states_tab;
+        unordered_map<DS::BitSet, int,DS::BitSetHash> new_states_tab;
         // init split the states to fin states or non-fin states
 
         // old_state -> new_state
         map<int, int> old_new_tab;
         // 0-non fin,1 fin
-        set<int> init_states[2];
+        DS::BitSet init_states[2];
         for (int i = 0; i < tab.size(); i++)
         {
             init_states[fin_stat_tab.count(i)].insert(i);
@@ -79,7 +78,9 @@ namespace Alg
             {
                 // char , <dest_new_state,old_state> ; collect information
                 map<char, vector<pair<int, int>>> char_conv_tab;
-                for (auto stat : it->first)
+                // it->first is BitSet need to convert to vector to iterate.
+                auto vec_states = it->first.to_vector();
+                for (auto stat : vec_states)
                 {
                     for (auto [ch, num] : tab[stat])
                         char_conv_tab[ch].push_back({old_new_tab[num], stat});
@@ -90,10 +91,10 @@ namespace Alg
                 for (auto &[ch, vec] : char_conv_tab)
                 {
                     // some states don't have the ch transfer, we need insert them to vec
-                    set<int> calced;
+                    DS::BitSet calced;
                     for (auto tmp : vec)
                         calced.insert(tmp.second);
-                    for (auto cur_s : it->first)
+                    for (auto cur_s : vec_states)
                         if (!calced.count(cur_s))
                             vec.push_back({-1, cur_s});
                     auto cur_split = split_states(vec);

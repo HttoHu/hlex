@@ -1,18 +1,20 @@
 #pragma cone
 
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <set>
+#include <map>
 #include "./to-nfa.h"
+#include "./mbitset.h"
 
 /*
  */
 namespace Alg
 {
-    using std::map;
+    using std::unordered_map;
     using std::set;
-    using char_type = char;
-
+    using std::map;
+    
     struct StateTable
     {
     public:
@@ -20,6 +22,7 @@ namespace Alg
 
         StateTable trim_tab();
         bool match_whole(const std::string &str);
+
     public:
         int entry = 0;
         set<int> fin_stat_tab;
@@ -28,64 +31,25 @@ namespace Alg
     class SubsetAlg
     {
     public:
-        SubsetAlg(Graph *_NFA) : NFA(_NFA)
+        SubsetAlg(Graph *_NFA) : NFA(_NFA), mg(_NFA)
         {
             gen_epsilon_tab();
         }
         StateTable gen_state_tab();
-        ~SubsetAlg() {NFA->destroy(); delete NFA; }
+        ~SubsetAlg()
+        {
+            NFA->destroy();
+            delete NFA;
+        }
 
     private:
         Graph *NFA;
-        map<Node *, set<Node *>> closure_tab;
+        MGraph mg;
+        unordered_map<int, DS::BitSet> closure_tab;
 
-        // dfs
-        set<Node *> epsilon_clo(Node *node)
-        {
-            std::vector<Node *> s;
-            s.push_back(node);
-
-            set<Node *> vis;
-            vis.insert(node);
-            while (!s.empty())
-            {
-                auto cur = s.back();
-                s.pop_back();
-                for (auto i = cur->head; i; i = i->next)
-                {
-                    if (!i->is_epsilon || vis.count(i->dest))
-                        continue;
-                    auto v = i->dest;
-                    vis.insert(v);
-
-                    if (closure_tab.count(v))
-                    {
-                        set<Node *> &tmp_set = closure_tab[v];
-                        vis.insert(tmp_set.begin(), tmp_set.end());
-                        continue;
-                    }
-                    s.push_back(v);
-                }
-            }
-            return vis;
-        }
-        void gen_epsilon_tab()
-        {
-            vector<Node *> s;
-            s.push_back(NFA->start);
-            while (!s.empty())
-            {
-                auto cur = s.back();
-                s.pop_back();
-                if (closure_tab.count(cur))
-                    continue;
-                closure_tab.insert({cur, std::move(epsilon_clo(cur))});
-                for (auto i = cur->head; i; i = i->next)
-                {
-                    if (!closure_tab.count(i->dest))
-                        s.push_back(i->dest);
-                }
-            }
-        }
+        // dfs to gen epsilon closure from u
+        DS::BitSet epsilon_clo(int u);
+        // gen all state epsilon closure 
+        void gen_epsilon_tab();
     };
 }

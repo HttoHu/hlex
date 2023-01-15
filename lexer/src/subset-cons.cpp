@@ -1,5 +1,4 @@
 #include "../includes/subset-cons.h"
-
 namespace Alg
 {
     using std::pair;
@@ -37,41 +36,44 @@ namespace Alg
         StateTable ret;
         int cnt = 0;
         // dfs stack
-        vector<pair<int, set<Node *>>> s;
-        map<set<Node *>, int> vis;
+        vector<pair<int, DS::BitSet>> s;
+        unordered_map<DS::BitSet, int, DS::BitSetHash> vis;
 
-        vis.insert({closure_tab[NFA->start], cnt});
-        s.push_back({cnt++, closure_tab[NFA->start]});
+        vis.insert({closure_tab[0], cnt});
+        s.push_back({cnt++, closure_tab[0]});
+
         while (!s.empty())
         {
             auto [id, cur_set] = std::move(s.back());
             s.pop_back();
             // ch -> new DFA state set
-            map<char_type, set<Node *>> trans_tab;
+            map<char_type, DS::BitSet> trans_tab;
             // ch -> new DFA state number
             map<char_type, int> trans_id_tab;
             bool is_fin_state = false;
-            for (auto node : cur_set)
+
+            auto vec = cur_set.to_vector();
+            for (auto node : vec)
             {
-                if (node->is_end)
+                if (mg.is_end(node))
                     is_fin_state = true;
 
-                for (auto i = node->head; i; i = i->next)
+                for (auto [v, ch] : mg.ng[node])
                 {
-                    if (i->is_epsilon)
+                    if (ch == 0)
                         continue;
-                    auto it = trans_tab.find(i->value);
-                    set<Node *> tmp_tab = closure_tab[i->dest];
+                    auto it = trans_tab.find(ch);
+                    DS::BitSet tmp_tab = closure_tab[v];
                     if (it == trans_tab.end())
                     {
-                        trans_tab.insert({i->value, tmp_tab});
+                        trans_tab.insert({ch, tmp_tab});
                         if (!vis.count(tmp_tab))
-                            trans_id_tab.insert({i->value, cnt++});
+                            trans_id_tab.insert({ch, cnt++});
                         else
-                            trans_id_tab.insert({i->value, vis[tmp_tab]});
+                            trans_id_tab.insert({ch, vis[tmp_tab]});
                     }
                     else
-                        it->second.insert(tmp_tab.begin(), tmp_tab.end());
+                        it->second |= tmp_tab;
                 }
             }
             if (ret.tab.size() <= id)
@@ -93,4 +95,50 @@ namespace Alg
         return ret;
     }
 
+    DS::BitSet SubsetAlg::epsilon_clo(int u)
+    {
+        std::vector<int> s;
+        s.push_back(u);
+
+        DS::BitSet vis;
+        vis.insert(u);
+        while (!s.empty())
+        {
+            auto cur = s.back();
+            s.pop_back();
+            auto &vec = mg.ng[cur];
+            for (auto [v, ch] : vec)
+            {
+                if (ch != 0 || vis.count(v))
+                    continue;
+                vis.insert(v);
+                if (closure_tab.count(v))
+                {
+                    vis |= closure_tab[v];
+                    continue;
+                }
+                s.push_back(v);
+            }
+        }
+        return vis;
+    }
+    void SubsetAlg::gen_epsilon_tab()
+    {
+        vector<int> s;
+        s.push_back(0);
+        while (!s.empty())
+        {
+            auto cur = s.back();
+            s.pop_back();
+            if (closure_tab.count(cur))
+                continue;
+            closure_tab.insert({cur, std::move(epsilon_clo(cur))});
+            auto &vec = mg.ng[cur];
+            for (auto [v, ch] : vec)
+            {
+                if (!closure_tab.count(v))
+                    s.push_back(v);
+            }
+        }
+    }
 }

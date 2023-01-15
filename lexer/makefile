@@ -1,5 +1,5 @@
 target = bin/lexer
-cc = g++ -O2 -std=c++17
+cc = g++ -g -std=c++17
 
 SRC= $(wildcard ./src/*.cpp)
 OBJ= $(addprefix obj/,$(patsubst %.cpp,%.o,$(notdir $(SRC))))
@@ -7,14 +7,15 @@ BIN= ./bin/lexer
 
 define COM_INS 
 @echo "\033[31m 正在编译$@ \033[0m"
-@$(cc) -O2 -c $< -o $@
+@$(cc) -g -c $< -o $@
 endef
 
 # Dependencies
-main_dep = subset-cons.h
-subset_cons_dep = to-nfa.h
+main_dep = $(re_dep)  
+subset_cons_dep = subset-cons.h to-nfa.h mbitset.h
 hopcroft_dep = subset-cons.h
-parser_dep = subset-cons.h
+parser_dep = parser.h subset-cons.h
+re_dep = re.h parser.h
 
 all:$(target)
 
@@ -28,6 +29,10 @@ obj/hopcroft.o: src/hopcroft.cpp $(addprefix includes/, $(hopcroft_dep))
 	$(COM_INS)
 obj/parser.o: src/parser.cpp $(addprefix includes/, $(parser_dep))
 	$(COM_INS)
+obj/mbitset.o: src/mbitset.cpp 
+	$(COM_INS)
+obj/re.o: src/re.cpp 
+	$(COM_INS)
 
 $(target):$(OBJ)
 	@$(cc) -g $^ -o $(target) -lpthread
@@ -37,6 +42,7 @@ $(target):$(OBJ)
 clean:
 	@rm $(OBJ)
 	@rm $(target)
+	@rm ./back.zip
 run:
 	@$(target)
 

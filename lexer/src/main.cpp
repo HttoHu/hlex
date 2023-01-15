@@ -1,9 +1,14 @@
-#include "../includes/subset-cons.h"
+// #include "../includes/subset-cons.h"
+#include "../includes/re.h"
+
+#include <time.h>
+#include <unordered_map>
+#include <iostream>
+
 namespace Test
 {
     namespace Hopcroft
     {
-        using namespace Alg;
         void case1();
     }
 }
@@ -16,12 +21,16 @@ namespace ReParser
 }
 int main()
 {
-    int cnt=0;
-    while (true)
-    {
-        cnt++;
-        printf("%d\n",cnt);
-        ReParser::Test::case1();
-    }
+    using namespace Alg;
+    using namespace Htto;
+    int cnt = 0;
+    time_t s = clock();
+    ReExpr regex("[A-Za-z]+-[A-Za-z]+");
+    
+    auto res = regex.match("Hello-Now is 2023-01-15 Have a nice day");
+    std::cout << res.start << " " << res.str << "\n";
+
+    time_t e = clock();
+    // std::cout << (double)(e - s) / CLOCKS_PER_SEC;
     return 0;
 }

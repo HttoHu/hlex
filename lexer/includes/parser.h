@@ -69,11 +69,7 @@ namespace ReParser
     ParserNode *parse_term(const std::string &s, int &pos);
     ParserNode *parse_factor(const std::string &s, int &pos);
     ParserNode *parse_atom(const std::string &s, int &pos);
-    void error(const std::string &msg)
-    {
-        std::cout << msg<<std::endl;
-        exit(1);
-    }
+    void error(const std::string &msg);
     namespace Test
     {
         void case1();
