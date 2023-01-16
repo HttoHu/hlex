@@ -23,7 +23,7 @@
 [keywords]{
     IF: if,
     WHILE: while
-}
+}$
 
 # The following rules are common rules. They begin with Tag and end with a regular expression and terminal char($) with conlon seperate them, and those rules are to conduct the program to tokenize.
 
@@ -48,7 +48,7 @@ while printf 123+1.23+234ull+0ll+31.4 if
 
 pretty nice.
 ```
-## hlex Principle
+## hlex principle
 构造一个自动的词法分析器，能够分析如下规则的正则表达式
 
 [中科大的华保健编译原理](https://www.bilibili.com/video/BV16h411X7JY/?spm_id_from=333.999.0.0)
@@ -68,7 +68,7 @@ some indent chars.
 ### 需要实现的Lab(算法)
 1. Tompson 算法分析正则表达式，构造出NFA
 2. 子集构造算法将NFA转换为DFA，目的是生成一个确定的转换表
-3. Hopocroft 算法（选做）：优化DFA
+3. Hopocroft 算法：优化DFA
 
 本代码大部分指针用法类似于week_ptr，每次传入会转移所有权，由接受的对象负责析构!!!.
 
@@ -87,7 +87,7 @@ some indent chars.
 
 如果是正闭包就去掉下面那个 epsilon 飞线就行
 
-实现难度不高，连图就行
+实现难度不高，连图就行。由于我们不仅仅做正则匹配，还要做词法分析，我们要在图结束状态添加 tag。
 
 ### 子集构造法
 子集构造法将 NFA转换为DFA
@@ -114,34 +114,29 @@ step2. 我们考虑所有的边，我们要确保同一个集合中所有状态�
 
 算法原理非常简单，只不过我实现的比较复杂了。这又是一个 fixed pointer iterative.
 
+**为了实现词法分析器的自动生成，我们在第一步首先要将tag不同的fin状态划分为不同的集合。**
 
 ### 下面就是解析正则了
 
 基本的算法搞完了，下面开始分析正则表达式了。干脆直接递归下降吧，简单方便。
 
 先确定表达式优先级，写点产生式
-
+```
 Expr -> Term ( | Term )* // (xxx) * 类似于正则的那个repeat，这个比较方便递归下降的分析
-
      -> Term Term 
      
 Term -> Factor * 
-
-      | Factor +
-
+     -> Factor +
       // OPT | Factor {number}  
-
       // OPT | Factor {number , number} 
-      | Factor 
+     -> Factor 
 
 Factor -> (Expr)
-
        -> [Range]
-
           Atom 
 
 Atom -> alpha_number 
      -> \escape_char 
-
+```
 ### 正则表达式引擎的优化
 使用 BitSet 替换 set<Node*> 或者 set<int> 将会得到几十倍的性能提升（主要提升在子集构造法，涉及到集合运算）

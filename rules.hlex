@@ -2,7 +2,7 @@
 [keywords]{
     IF: if,
     WHILE: while
-}
+}$
 NUMBER: [0-9]+$
 LONG:[0-9]+ll$
 ULONG :[0-9]+ull$
