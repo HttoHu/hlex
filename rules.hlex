@@ -1,5 +1,14 @@
+# keywords extension
+[keywords]{
+    IF: if,
+    WHILE: while
+}
 NUMBER: [0-9]+$
+LONG:[0-9]+ll$
+ULONG :[0-9]+ull$
 SYMBOL: [_a-zA-Z][_a-zA-Z0-9]*$
 REAL:[0-9]+.[0-9]+$
 DOT:.$
 SPACE: \s$
+NEWLINE:\n$
+PLUS:+$

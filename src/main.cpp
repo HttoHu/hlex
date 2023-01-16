@@ -43,19 +43,14 @@ std::string read_file(const std::string &filename)
 int main()
 {
     using namespace Alg;
-    freopen("output.txt", "w",stdout);
+    // freopen("output.txt", "w",stdout);
     time_t s = clock();
     std::string file = read_file("./rules.hlex");
     Lexer::Scanner scan(file);
     Lexer::LexerGenerator L(scan);
-
-    auto vec = L.lex("Hello World . I am Htto from M 9.26 M78 Automan");
-
+    auto vec = L.lex("while printf 123+1.23+234ull+0ll+31.4 if");
     for (auto token : vec)
-    {
         std::cout << token.to_string();
-    }
-
     time_t e = clock();
     // std::cout << (double)(e - s) / CLOCKS_PER_SEC;
     return 0;

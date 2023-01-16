@@ -8,8 +8,47 @@
 
     std::cout << res.start << " " << res.str << "\n";
 ```
+## Lexer Usage 
+1. `make` to build the project to test
+2. include `includes/lexer.h` 
+```cpp
+    std::string file = read_file("./rules.hlex"); // rule file
+    Lexer::Scanner scan(file);
+    Lexer::LexerGenerator L(scan);
+    auto vec = L.lex("some strings you want to scan");
+```
+3. rule file 
+```
+# keywords extension, some symbols are keywords ,you can specify them as follows.
+[keywords]{
+    IF: if,
+    WHILE: while
+}
 
-## Lexer Principle
+# The following rules are common rules. They begin with Tag and end with a regular expression and terminal char($) with conlon seperate them, and those rules are to conduct the program to tokenize.
+
+NUMBER: [0-9]+$
+LONG:[0-9]+ll$
+ULONG :[0-9]+ull$
+SYMBOL: [_a-zA-Z][_a-zA-Z0-9]*$
+REAL:[0-9]+.[0-9]+$
+DOT:.$
+SPACE: \s$
+NEWLINE:\n$
+PLUS:+$
+```
+3. example
+```
+using upper rules scan the string
+
+while printf 123+1.23+234ull+0ll+31.4 if
+
+=> 
+<WHILE,while><SPACE, ><SYMBOL,printf><SPACE, ><NUMBER,123><PLUS,+><REAL,1.23><PLUS,+><ULONG,234ull><PLUS,+><LONG,0ll><PLUS,+><REAL,31.4><SPACE, ><SYMBOL,if>
+
+pretty nice.
+```
+## hlex Principle
 构造一个自动的词法分析器，能够分析如下规则的正则表达式
 
 [中科大的华保健编译原理](https://www.bilibili.com/video/BV16h411X7JY/?spm_id_from=333.999.0.0)

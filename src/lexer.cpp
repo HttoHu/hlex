@@ -43,6 +43,28 @@ namespace Lexer
         }
         return ret;
     }
+    RuleLine Scanner::parse_keywords()
+    {
+        RuleLine ret;
+        ret.kind = RuleLine::KEYWORDS;
+        match('{');
+        while (pos < content.size() && get_ch() != '$')
+        {
+            std::string symbol = read_word();
+            match(':');
+            std::string key = read_word();
+            ret.specify_tab.insert({key, symbol});
+            if (get_ch() != ',')
+            {
+                match('}');
+                break;
+            }
+            else
+                match(',');
+        }
+        match('$');
+        return ret;
+    }
     RuleLine Scanner::next_ruleline()
     {
         RuleLine ret;
@@ -63,7 +85,16 @@ namespace Lexer
         }
         else if (cur_ch = '[')
         {
-            // to do
+            match('[');
+            std::string keyword = read_word();
+            if (keyword == "keywords")
+            {
+                match(']');
+                return parse_keywords();
+            }
+            else if (keyword == "ignore")
+            {
+            }
         }
         return ret;
     }
@@ -110,10 +141,11 @@ namespace Lexer
                 else
                     g = Alg::Graph::cup(g, cur_graph);
             }
+            else if (rules[i].kind == RuleLine::KEYWORDS)
+                keywords.insert(rules[i].specify_tab.begin(), rules[i].specify_tab.end());
         }
         Alg::SubsetAlg sa(g);
         st = std::move(sa.gen_state_tab().trim_tab());
-        st.print_tab();
     }
     std::vector<Token> LexerGenerator::lex(const std::string &str)
     {
@@ -129,7 +161,6 @@ namespace Lexer
 
         while (pos < str.size())
         {
-
             if (tab[cur_state].count(str[pos]))
             {
                 cur_state = tab[cur_state][str[pos]];
@@ -147,9 +178,16 @@ namespace Lexer
             else
             {
                 if (pos_stac.empty())
-                    std::runtime_error("LexerGenerator::lex: Lexer Error");
+                    throw std::runtime_error("LexerGenerator::lex: Lexer Error");
                 auto [p, tok] = pos_stac.back();
-                ret.push_back(tok);
+                // if a symbol is a keyword
+                auto val = tok.val;
+                if (keywords.count(val))
+                    ret.push_back(Token{keywords[val], val});
+                else
+                    ret.push_back(tok);
+                
+                // roll back 
                 pos = p;
                 cur_state = st.entry;
                 cur_token = cur_tag = "";

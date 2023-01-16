@@ -9,8 +9,9 @@ namespace Lexer
         enum Tag
         {
             RE,
-            SPECIFY,
+            KEYWORDS,
             USER_DEF,
+            IGNORE,
             END
         };
 
@@ -28,6 +29,7 @@ namespace Lexer
         RuleLine next_ruleline();
 
     private:
+        RuleLine parse_keywords();
         void skip();
         std::string read_word();
         std::string read_to_dollar();
@@ -41,7 +43,7 @@ namespace Lexer
         std::string val;
         std::string to_string() const
         {
-            return "<" + tag +"," + val + ">";
+            return "<" + tag + "," + val + ">";
         }
     };
     class LexerGenerator
@@ -52,6 +54,8 @@ namespace Lexer
         std::string gen_code();
 
     private:
+        std::map<std::string, std::string> keywords;
+        std::set<std::string> ignore;
         std::vector<RuleLine> rules;
         Alg::StateTable st;
     };

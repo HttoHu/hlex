@@ -1,8 +1,0 @@
-		0 0-4 1-4 2-4 3-4 4-4 5-4 6-4 7-4 8-4 9-4 
-*DOT		1 
-*NUMBER		2 .-0 0-2 1-2 2-2 3-2 4-2 5-2 6-2 7-2 8-2 9-2 
--		3  -6 .-1 0-2 1-2 2-2 3-2 4-2 5-2 6-2 7-2 8-2 9-2 A-5 B-5 C-5 D-5 E-5 F-5 G-5 H-5 I-5 J-5 K-5 L-5 M-5 N-5 O-5 P-5 Q-5 R-5 S-5 T-5 U-5 V-5 W-5 X-5 Y-5 Z-5 _-5 a-5 b-5 c-5 d-5 e-5 f-5 g-5 h-5 i-5 j-5 k-5 l-5 m-5 n-5 o-5 p-5 q-5 r-5 s-5 t-5 u-5 v-5 w-5 x-5 y-5 z-5 
-*REAL		4 0-4 1-4 2-4 3-4 4-4 5-4 6-4 7-4 8-4 9-4 
-*SYMBOL		5 0-5 1-5 2-5 3-5 4-5 5-5 6-5 7-5 8-5 9-5 A-5 B-5 C-5 D-5 E-5 F-5 G-5 H-5 I-5 J-5 K-5 L-5 M-5 N-5 O-5 P-5 Q-5 R-5 S-5 T-5 U-5 V-5 W-5 X-5 Y-5 Z-5 _-5 a-5 b-5 c-5 d-5 e-5 f-5 g-5 h-5 i-5 j-5 k-5 l-5 m-5 n-5 o-5 p-5 q-5 r-5 s-5 t-5 u-5 v-5 w-5 x-5 y-5 z-5 
-*SPACE		6 
-<SYMBOL,Hello><SPACE, ><SYMBOL,World><SPACE, ><DOT,.><SPACE, ><SYMBOL,I><SPACE, ><SYMBOL,am><SPACE, ><SYMBOL,Htto><SPACE, ><SYMBOL,from><SPACE, ><SYMBOL,M><SPACE, ><REAL,9.26><SPACE, ><SYMBOL,M78><SPACE, ><SYMBOL,Automan>

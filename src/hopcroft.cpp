@@ -1,6 +1,6 @@
 #include "../includes/subset-cons.h"
 #include "../includes/mbitset.h"
-#define CHECK_INTERNAL_ERROR
+// #define CHECK_INTERNAL_ERROR
 namespace Alg
 {
     using std::cout;
@@ -150,7 +150,9 @@ namespace Alg
         new_states_tab.insert({init_states[0], 0});
         new_states_tab.insert({init_states[1], 1});
         int new_states_cnt = 2;
-
+        
+        // split the fin state which has different tag
+        split_different_tag(new_states_tab, old_new_tab, fin_stat_tab, new_states_cnt);
         // fixed point iterative.
         while (flag)
         {
@@ -192,8 +194,7 @@ namespace Alg
                     it++;
             }
         }
-        // split the fin state which has different tag
-        split_different_tag(new_states_tab, old_new_tab, fin_stat_tab, new_states_cnt);
+
         // gen_new_tab
         StateTable ret;
         ret.tab.resize(new_states_cnt);
