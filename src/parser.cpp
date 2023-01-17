@@ -159,7 +159,7 @@ namespace ReParser
     ParserNode *parse_atom(const std::string &s, int &pos)
     {
         std::map<Alg::char_type, Alg::char_type> escape_tab = {
-            {'s', ' '}, {'|', '|'}, {'n', '\n'}, {'t', '\t'}, {'(', '('}, {')', ')'}, {'[', '['}, {']', ']'}};
+            {'s', ' '}, {'|', '|'}, {'n', '\n'}, {'r', '\r'}, {'t', '\t'}, {'(', '('}, {')', ')'}, {'[', '['}, {']', ']'}, {'+', '+'}, {'*', '*'}};
         skip_space(s, pos);
         // escape chars
         if (pos < s.size() && s[pos] == '\\')
@@ -170,7 +170,7 @@ namespace ReParser
             char cur = s[pos];
             pos++;
             if (!escape_tab.count(cur))
-                error("unknown escape char \\" + s[pos]);
+                error("unknown escape char \\" + std::string(1, cur));
             return new Unit(escape_tab[cur]);
         }
         else
@@ -184,12 +184,11 @@ namespace ReParser
     }
     void error(const std::string &msg)
     {
-        std::cout << msg<<std::endl;
+        std::cout << msg << std::endl;
         exit(1);
     }
 
-
-    // class methold defination .... 
+    // class methold defination ....
     void BinOp::print() const
     {
         std::cout << "(";
@@ -221,7 +220,7 @@ namespace ReParser
     namespace Test
     {
         // 2023-1-13 : 10 times 1.65625 O2 WSL
-        // 2023-1-14 : 10 times 0.04687 O2 WSL 
+        // 2023-1-14 : 10 times 0.04687 O2 WSL
         void case1()
         {
             const std::string patten = "[_a-zA-Z][_a-zA-Z0-9]+";
@@ -231,11 +230,11 @@ namespace ReParser
             auto g = tmp->gen_graph();
 
             Alg::SubsetAlg sa(g);
-            
+
             auto tab = sa.gen_state_tab().trim_tab();
 
             // tab.print_tab();
-            std::string str="jdlkajglk21098jdlkajf21098hlsajg091238h";
+            std::string str = "jdlkajglk21098jdlkajf21098hlsajg091238h";
             // std::getline(std::cin, str);
             if (tab.match_whole(str))
                 std::cout << "AC!\n";

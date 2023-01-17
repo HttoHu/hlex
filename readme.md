@@ -17,37 +17,137 @@
     Lexer::LexerGenerator L(scan);
     auto vec = L.lex("some strings you want to scan");
 ```
-3. rule file 
+3. write a rule file, and every rule ended with $
+
+   there are four type rules: 
+
+   * keywords: The hlex can not distinct keywords from symbols, so you need to specify them.
+   * ignore: Some tokens are useless for following phases, you can ignore it.
+   * user_def: You can define your method to scan special tokens which the DFA is difficult to process. 
+   * tag definitions: `[tag_name] : [regular expression]`, hlex makes different tokens to different tags by their regular expression.
+
+   here is an example 
 ```
-# keywords extension, some symbols are keywords ,you can specify them as follows.
 [keywords]{
     IF: if,
     WHILE: while
 }$
 
-# The following rules are common rules. They begin with Tag and end with a regular expression and terminal char($) with conlon seperate them, and those rules are to conduct the program to tokenize.
+[ignore]{
+    SPACE,ANNOTATION
+}$
 
+# Here is a simple string scanner. You need to define the LITERAL first.
+# The user_def function is (const std::string &s,int &pos) -> string, the tag of the token still remains and the value is what you returned.
+
+[user_def,LITERAL]{
+    pos++;
+    std::map<char, std::string> escape = {
+        {'n', "\n"}, {'t', "\t"}, {'r', "\r"}, {'\\', "\\"}};
+    std::string ret = "";
+    while (pos < s.size() && s[pos] != '\"')
+    {
+        if (s[pos] == '\\')
+        {
+            if (pos == s.size())
+                throw std::runtime_error("invalid string");
+            pos++;
+            if (!escape.count(s[pos]))
+                throw std::runtime_error("invalid escape string!");
+            ret += escape[s[pos]];
+        }
+        else
+            ret += s[pos];
+        pos++;
+    }
+    pos++;
+    return ret;
+}$
+[user_def,ANNOTATION]{
+    while(pos<s.size() && s[pos]!='\n')
+        pos++;
+    return "";
+}$
+
+ANNOTATION://$
 NUMBER: [0-9]+$
 LONG:[0-9]+ll$
-ULONG :[0-9]+ull$
 SYMBOL: [_a-zA-Z][_a-zA-Z0-9]*$
 REAL:[0-9]+.[0-9]+$
 DOT:.$
-SPACE: \s$
+COMMA:,$
+
+# LITERAL is scaned by user-define function. 
+LITERAL:"$
+ADD:\+$
+SUB:-$
+MUL: \*$
+DIV:/$
+
+ASSIGN: =$
+
+COMMA: ;$
+# compare operation 
+LT: <$
+GT: >$
+LE: <=$
+GE: >=$
+
+LPAR:\($
+RPAR:\)$
+SPACE: \s|\t$
 NEWLINE:\n$
-PLUS:+$
 ```
-3. example
+4. run `./bin/lexer [output-path]` to generate your lexer   
+5. add the main function to test
+
+```cpp
+namespace HLex...
+
+int main()
+{
+    HLex::Lexer L(HLex::read_file("test.txt"));
+    auto vec = L.lex();
+    for (auto item : vec)
+    {
+        std::cout << item.to_string();
+    }
+}
 ```
-using upper rules scan the string
 
-while printf 123+1.23+234ull+0ll+31.4 if
+4.  test cases(using upper rule) 
 
-=> 
-<WHILE,while><SPACE, ><SYMBOL,printf><SPACE, ><NUMBER,123><PLUS,+><REAL,1.23><PLUS,+><ULONG,234ull><PLUS,+><LONG,0ll><PLUS,+><REAL,31.4><SPACE, ><SYMBOL,if>
-
-pretty nice.
 ```
+//===========================test-case 1==========================================
+INPUT:
+int max(int a,int b)
+{
+	if(a > b)
+		return a;
+	return b;
+}
+
+OUTPUT:
+<SYMBOL,int><SYMBOL,max><LPAR,(><SYMBOL,int><SYMBOL,a><COMMA,,><SYMBOL,int><SYMBOL,b><RPAR,)><NEWLINE,
+><BEGIN,{><NEWLINE,
+><IF,if><LPAR,(><SYMBOL,a><GT,>><SYMBOL,b><RPAR,)><NEWLINE,
+><SYMBOL,return><SYMBOL,a><COMMA,;><NEWLINE,
+><SYMBOL,return><SYMBOL,b><COMMA,;><NEWLINE,
+><END,}>
+
+//===========================test-case 2==========================================
+INPUT:
+// this is an ANNOTATION. the output will ignore me
+int a = 3.1415+1ull-1ll+"hello World\n";
+
+OUTPUT:
+<NEWLINE,
+><SYMBOL,int><SYMBOL,a><ASSIGN,=><REAL,3.1415><ADD,+><NUMBER,1><SYMBOL,ull><SUB,-><LONG,1ll><ADD,+><LITERAL,hello World
+><COMMA,;>
+```
+
+
+
 ## hlex principle
 构造一个自动的词法分析器，能够分析如下规则的正则表达式
 

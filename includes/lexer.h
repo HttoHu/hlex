@@ -31,6 +31,7 @@ namespace Lexer
     private:
         RuleLine parse_keywords();
         RuleLine parse_list();
+        RuleLine parse_user_def();
         void skip();
         std::string read_word();
         std::string read_to_dollar();
@@ -52,10 +53,11 @@ namespace Lexer
     public:
         LexerGenerator(Scanner s);
         std::vector<Token> lex(const std::string &str);
-        std::string gen_code();
+        std::string gen_code(const std::string &temp_path);
 
     private:
         std::map<std::string, std::string> keywords;
+        std::map<std::string,std::string> user_def;
         std::set<std::string> ignore;
         std::vector<RuleLine> rules;
         Alg::StateTable st;

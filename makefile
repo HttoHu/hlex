@@ -35,7 +35,9 @@ obj/re.o: src/re.cpp $(addprefix includes/, $(re_dep))
 	$(COM_INS)
 obj/lexer.o: src/lexer.cpp $(addprefix includes/, $(lexer_dep))
 	$(COM_INS)
-
+obj/utils.o: src/utils.cpp
+	$(COM_INS)
+	
 $(target):$(OBJ)
 	@$(cc) -g $^ -o $(target) -lpthread
 	@echo "\033[33m 生成完毕\033[0m"

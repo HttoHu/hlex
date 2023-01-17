@@ -1,17 +1,70 @@
-# keywords extension
 [keywords]{
     IF: if,
     WHILE: while
 }$
+
 [ignore]{
-    SPACE,NEWLINE,SYMBOL,REAL
+    SPACE,ANNOTATION
 }$
+
+# Here is a simple string scanner. You need to define the LITERAL first.
+# The user_def function is (const std::string &s,int &pos) -> string, the tag of the token still remains and the value is what you returned.
+
+[user_def,LITERAL]{
+    pos++;
+    std::map<char, std::string> escape = {
+        {'n', "\n"}, {'t', "\t"}, {'r', "\r"}, {'\\', "\\"}};
+    std::string ret = "";
+    while (pos < s.size() && s[pos] != '\"')
+    {
+        if (s[pos] == '\\')
+        {
+            if (pos == s.size())
+                throw std::runtime_error("invalid string");
+            pos++;
+            if (!escape.count(s[pos]))
+                throw std::runtime_error("invalid escape string!");
+            ret += escape[s[pos]];
+        }
+        else
+            ret += s[pos];
+        pos++;
+    }
+    pos++;
+    return ret;
+}$
+[user_def,ANNOTATION]{
+    while(pos<s.size() && s[pos]!='\n')
+        pos++;
+    return "";
+}$
+
+ANNOTATION://$
 NUMBER: [0-9]+$
 LONG:[0-9]+ll$
-ULONG :[0-9]+ull$
 SYMBOL: [_a-zA-Z][_a-zA-Z0-9]*$
 REAL:[0-9]+.[0-9]+$
 DOT:.$
-SPACE: \s$
-NEWLINE:\n$
-PLUS:+$
+COMMA:,$
+
+# LITERAL is scaned by user-define function. 
+LITERAL:"$
+ADD:\+$
+SUB:-$
+MUL: \*$
+DIV:/$
+
+ASSIGN: =$
+
+COMMA: ;$
+# compare operation 
+LT: <$
+GT: >$
+LE: <=$
+GE: >=$
+BEGIN :{$
+END :}$
+LPAR:\($
+RPAR:\)$
+SPACE: \s|\t$
+NEWLINE:\r\n | \n$

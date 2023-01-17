@@ -1,57 +1,43 @@
 // #include "../includes/subset-cons.h"
 #include "../includes/lexer.h"
-
 #include <time.h>
 #include <unordered_map>
 #include <iostream>
 #include <fstream>
 
-namespace Test
+namespace Utils
 {
-    namespace Hopcroft
-    {
-        void case1();
-    }
-}
-namespace ReParser
-{
-    namespace Test
-    {
-        void case1();
-    }
-}
-std::string read_file(const std::string &filename)
-{
-    std::ifstream ifs(filename, std::ios::in | std::ios::binary);
-    if (!ifs)
-        throw std::runtime_error("open file " + filename + " failed\n");
-    char *file_content;
-    ifs.seekg(0, std::ios::end);
-    size_t file_length = ifs.tellg();
-    ifs.seekg(0, std::ios::beg);
-
-    file_content = new char[file_length];
-
-    ifs.read(file_content, file_length);
-    ifs.close();
-
-    std::string str(file_content, file_content + file_length);
-    delete[] file_content;
-    return str;
+    std::string read_file(const std::string &filename);
 }
 
-int main()
+void gen_lexer(int argc, char **argv)
 {
     using namespace Alg;
-    // freopen("output.txt", "w",stdout);
-    time_t s = clock();
-    std::string file = read_file("./rules.hlex");
+
+    if (argc != 2)
+    {
+        std::cerr << "invalid argument, usage: hlex [output]\n";
+        exit(1);
+    }
+
+    std::string file = Utils::read_file("./rules.hlex");
     Lexer::Scanner scan(file);
     Lexer::LexerGenerator L(scan);
-    auto vec = L.lex("while printf 123+1.23+234ull+0ll+31.4 if");
-    for (auto token : vec)
-        std::cout << token.to_string();
-    time_t e = clock();
-    // std::cout << (double)(e - s) / CLOCKS_PER_SEC;
+
+    std::ofstream ofs(argv[1]);
+    ofs << L.gen_code("./template/template.cpp");
+    ofs.close();
+}
+
+int main(int argc, char **argv)
+{
+    gen_lexer(argc,argv);
+    // std::string file = Utils::read_file("./rules.hlex");
+    // Lexer::Scanner scan(file);
+    // Lexer::LexerGenerator L(scan);
+
+    // auto ans = L.lex("if(a<b)\n return 1.23");
+    // for (auto item : ans)
+    //     std::cout << item.to_string() << "\n";
     return 0;
 }
