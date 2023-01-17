@@ -65,6 +65,26 @@ namespace Lexer
         match('$');
         return ret;
     }
+    RuleLine Scanner::parse_list()
+    {
+        RuleLine ret;
+        ret.kind = RuleLine::IGNORE;
+        match('{');
+        while (pos < content.size() && get_ch() != '$')
+        {
+            std::string item = read_word();
+            ret.specify_tab.insert({item, ""});
+            if (get_ch() != ',')
+            {
+                match('}');
+                break;
+            }
+            else
+                match(',');
+        }
+        match('$');
+        return ret;
+    }
     RuleLine Scanner::next_ruleline()
     {
         RuleLine ret;
@@ -94,8 +114,12 @@ namespace Lexer
             }
             else if (keyword == "ignore")
             {
+                match(']');
+                return parse_list();
             }
         }
+        else 
+            throw std::runtime_error("Scanner::next_ruleline() invalid rule!");
         return ret;
     }
     std::string Scanner::read_to_dollar()
@@ -143,6 +167,9 @@ namespace Lexer
             }
             else if (rules[i].kind == RuleLine::KEYWORDS)
                 keywords.insert(rules[i].specify_tab.begin(), rules[i].specify_tab.end());
+            else if (rules[i].kind == RuleLine::IGNORE)
+                for (auto str : rules[i].specify_tab)
+                    ignore.insert(str.first);
         }
         Alg::SubsetAlg sa(g);
         st = std::move(sa.gen_state_tab().trim_tab());
@@ -180,14 +207,14 @@ namespace Lexer
                 if (pos_stac.empty())
                     throw std::runtime_error("LexerGenerator::lex: Lexer Error");
                 auto [p, tok] = pos_stac.back();
-                // if a symbol is a keyword
+                // if a symbol is a keyword pr ignore
                 auto val = tok.val;
                 if (keywords.count(val))
                     ret.push_back(Token{keywords[val], val});
-                else
+                else if(!ignore.count(tok.tag))
                     ret.push_back(tok);
-                
-                // roll back 
+
+                // roll back
                 pos = p;
                 cur_state = st.entry;
                 cur_token = cur_tag = "";

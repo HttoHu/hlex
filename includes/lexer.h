@@ -30,6 +30,7 @@ namespace Lexer
 
     private:
         RuleLine parse_keywords();
+        RuleLine parse_list();
         void skip();
         std::string read_word();
         std::string read_to_dollar();
