@@ -6,7 +6,8 @@ namespace Htto
         auto graph = ReParser::parser(re_expr);
         // graph moved to sa
         Alg::SubsetAlg sa(graph);
-        st = sa.gen_state_tab().trim_tab();
+        st = sa.gen_state_tab();
+        
     }
     ReResult ReExpr::match(const std::string &str, int start)
     {

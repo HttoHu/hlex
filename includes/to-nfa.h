@@ -70,6 +70,8 @@ namespace Alg
         static Graph *cup(Graph *g1, Graph *g2);
         // g will destroy!
         static Graph *repeat(Graph *g, bool enable_zero);
+        // g?
+        static Graph *optional(Graph *g);
     };
 
     // build a simple number-idx-graph by a Graph , and all nodes from old graph will represent as a number from 1 to n.

@@ -23,6 +23,8 @@ namespace ReParser
     }
     Alg::Graph *Repeat::gen_graph()
     {
+        if (positive == -1)
+            return Alg::Graph::optional(unit->gen_graph());
         auto g = unit->gen_graph();
         return Alg::Graph::repeat(g, !positive);
     }
@@ -47,6 +49,41 @@ namespace ReParser
             error("expect " + std::string(1, ch) + " but got " + s[pos]);
         pos++;
         skip_space(s, pos);
+    }
+    void print_line(const std::string &s, int &pos)
+    {
+        int cnt = 100;
+        while (pos < s.size() && cnt)
+        {
+            std::cout << s[pos++];
+            cnt--;
+        }
+        std::cout.flush();
+    }
+    //get and move
+    char get_ch(const std::string &s, int &pos)
+    {
+        std::map<Alg::char_type, Alg::char_type> escape_tab = {
+            {'s', ' '}, {'|', '|'}, {'n', '\n'}, {'r', '\r'}, {'t', '\t'}, {'(', '('}, {')', ')'}, {'[', '['}, {']', ']'}, {'+', '+'}, {'*', '*'}, {'-', '-'}};
+        skip_space(s, pos);
+        char ret = 0;
+        if (pos < s.size())
+        {
+            if (s[pos] == '\\')
+            {
+                pos++;
+                if (pos == s.size())
+                    throw std::runtime_error("ReParser::get_ch(): escape unexpect eof!");
+                if (!escape_tab.count(s[pos]))
+                {
+                    print_line(s, pos);
+                    throw std::runtime_error(": ReParser::get_ch(): invalid escape!");
+                }
+                return escape_tab[s[pos++]];
+            }
+            else
+                return s[pos++];
+        }
     }
     Alg::Graph *parser(const std::string &str)
     {
@@ -99,9 +136,14 @@ namespace ReParser
             skip_space(s, pos);
             if (pos == s.size())
                 return cur_node;
-            if (s[pos] == '*' || s[pos] == '+')
+            if (s[pos] == '*' || s[pos] == '+' || s[pos] == '?')
             {
-                cur_node = new Repeat(cur_node, s[pos] == '+');
+                int is_p = 0;
+                if (s[pos] == '?')
+                    is_p--;
+                else if (s[pos] == '+')
+                    is_p++;
+                cur_node = new Repeat(cur_node, is_p);
                 pos++;
                 return cur_node;
             }
@@ -129,14 +171,12 @@ namespace ReParser
             match(s, pos, '[');
             do
             {
-                Alg::char_type start = s[pos];
-                pos++;
+                Alg::char_type start = get_ch(s,pos);
                 ParserNode *cur = nullptr;
                 if (s[pos] == '-')
                 {
                     match(s, pos, '-');
-                    Alg::char_type end = s[pos];
-                    pos++;
+                    Alg::char_type end = get_ch(s,pos);
                     if (end <= start)
                         error("invalid range ");
 
@@ -158,29 +198,8 @@ namespace ReParser
     }
     ParserNode *parse_atom(const std::string &s, int &pos)
     {
-        std::map<Alg::char_type, Alg::char_type> escape_tab = {
-            {'s', ' '}, {'|', '|'}, {'n', '\n'}, {'r', '\r'}, {'t', '\t'}, {'(', '('}, {')', ')'}, {'[', '['}, {']', ']'}, {'+', '+'}, {'*', '*'}};
-        skip_space(s, pos);
-        // escape chars
-        if (pos < s.size() && s[pos] == '\\')
-        {
-            match(s, pos, '\\');
-            if (pos == s.size())
-                error("reach to the end!");
-            char cur = s[pos];
-            pos++;
-            if (!escape_tab.count(cur))
-                error("unknown escape char \\" + std::string(1, cur));
-            return new Unit(escape_tab[cur]);
-        }
-        else
-        {
-            skip_space(s, pos);
-
-            char cur = s[pos];
-            pos++;
-            return new Unit(cur);
-        }
+        char cur = get_ch(s, pos);
+        return new Unit(cur);
     }
     void error(const std::string &msg)
     {

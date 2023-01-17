@@ -21,7 +21,16 @@ namespace HLex
             return "<" + tag + "," + val + ">";
         }
     };
-
+    void print_line(const std::string &s, int &pos)
+    {
+        int cnt = 100;
+        while (pos < s.size() && cnt)
+        {
+            std::cout << s[pos++];
+            cnt--;
+        }
+        std::cout.flush();
+    }
     class Lexer
     {
     public:
@@ -57,7 +66,10 @@ namespace HLex
                 else
                 {
                     if (pos_stac.empty())
-                        throw std::runtime_error("LexerGenerator::lex: Lexer Error");
+                    {
+                        print_line(content,pos);
+                        throw std::runtime_error(" LexerGenerator::lex: Lexer Error");
+                    }
                     auto [p, tok] = pos_stac.back();
                     // if a symbol is a keyword pr ignore
                     auto val = tok.val;

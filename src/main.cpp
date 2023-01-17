@@ -1,5 +1,6 @@
 // #include "../includes/subset-cons.h"
 #include "../includes/lexer.h"
+#include "../includes/re.h"
 #include <time.h>
 #include <unordered_map>
 #include <iostream>
@@ -28,16 +29,33 @@ void gen_lexer(int argc, char **argv)
     ofs << L.gen_code("./template/template.cpp");
     ofs.close();
 }
+void lex()
+{
+    std::string file = Utils::read_file("./rules.hlex");
+    Lexer::Scanner scan(file);
+    Lexer::LexerGenerator L(scan);
 
+    auto ans = L.lex("i+j=23");
+    for (auto item : ans)
+        std::cout << item.to_string() << "\n";
+}
+void RE()
+{
+    Htto::ReExpr re("[_a-bA-B][_a-bA-B0-1]*");
+    auto res = re.match("i");
+    std::cout << res.start << " " << res.str << "\n";
+}
 int main(int argc, char **argv)
 {
-    gen_lexer(argc,argv);
-    // std::string file = Utils::read_file("./rules.hlex");
-    // Lexer::Scanner scan(file);
-    // Lexer::LexerGenerator L(scan);
-
-    // auto ans = L.lex("if(a<b)\n return 1.23");
-    // for (auto item : ans)
-    //     std::cout << item.to_string() << "\n";
+    try
+    {
+        RE();
+        // gen_lexer(argc,argv);
+        // lex();
+    }
+    catch (std::exception &e)
+    {
+        std::cout << e.what() << "\n";
+    }
     return 0;
 }

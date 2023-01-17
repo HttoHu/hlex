@@ -121,6 +121,13 @@ namespace Alg
         delete g;
         return new Graph(start, end);
     }
+    Graph *Graph::optional(Graph *g)
+    {
+        Edge *e = new Edge(true, '*', g->end);
+        g->start->push_edge(e);
+        g->end->is_end = true;
+        return g;
+    }
     void Graph::destroy()
     {
         std::set<Node *> vis;

@@ -19,15 +19,15 @@ namespace Lexer
             return "Lexer::Lexer(const std::string &con):content(con),entry(" + std::to_string(entry) + "){\n";
         }
         template <typename T>
-        std::string conv_to_liter(const T &t)
+        std::string conv_to_liter(T t)
         {
             return std::to_string(t);
         }
         template <>
-        std::string conv_to_liter(const std::string &str)
+        std::string conv_to_liter(std::string str)
         {
             std::map<char, std::string> escape = {
-                {'\n', "\\n"}, {'\t', "\\t"}, {'\r', "\\r"}, {'\\', "\\\\"}};
+                {'\n', "\\n"}, {'\t', "\\t"}, {'\r', "\\r"}, {'\\', "\\\\"}, {'\'', "\\'"}};
 
             std::string ret = "\"";
             for (int i = 0; i < str.size(); i++)
@@ -41,12 +41,12 @@ namespace Lexer
             return ret;
         }
         template <>
-        std::string conv_to_liter(const char &ch)
+        std::string conv_to_liter(char ch)
         {
             if (ch == 0)
                 return "0";
             std::map<char, std::string> escape = {
-                {'\n', "\\n"}, {'\t', "\\t"}, {'\r', "\\r"}, {'\\', "\\\\"}};
+                {'\n', "\\n"}, {'\t', "\\t"}, {'\r', "\\r"}, {'\\', "\\\\"}, {'\'', "\\'"}};
             if (escape.count(ch))
                 return '\'' + escape[ch] + '\'';
             return '\'' + std::string(1, ch) + '\'';
@@ -57,6 +57,7 @@ namespace Lexer
             if (mp.empty())
                 return "{}";
             std::string ret = "{";
+            int cnt = 0;
             for (auto [k, v] : mp)
             {
                 ret += "{" + conv_to_liter(k) + "," + conv_to_liter(v) + "},";
@@ -238,6 +239,7 @@ namespace Lexer
             // user define code.
             else if (keyword == "user_def")
                 return parse_user_def();
+            ReParser::print_line(content, pos);
             throw std::runtime_error("Scanner::next_ruleline() invalid extension!");
         }
         else
@@ -276,6 +278,7 @@ namespace Lexer
         {
             if (rules[i].kind == RuleLine::RE)
             {
+                std::cout << "Read RE " << rules[i].symbol << " -- " << rules[i].content << "\n";
                 auto cur_graph = ReParser::parser(rules[i].content);
                 // attach tag
                 cur_graph->traverse_graph([&](Alg::Node *n)
@@ -287,12 +290,24 @@ namespace Lexer
                     g = Alg::Graph::cup(g, cur_graph);
             }
             else if (rules[i].kind == RuleLine::KEYWORDS)
+            {
+                std::cout << "Read KEYWORDS\n";
+
                 keywords.insert(rules[i].specify_tab.begin(), rules[i].specify_tab.end());
+            }
             else if (rules[i].kind == RuleLine::IGNORE)
+            {
+                std::cout << "Read IGNORE\n";
                 for (auto str : rules[i].specify_tab)
                     ignore.insert(str.first);
+            }
             else if (rules[i].kind == RuleLine::USER_DEF)
+            {
+                std::cout << "Read USERDEF " << rules[i].symbol << "\n";
                 user_def.insert({rules[i].symbol, rules[i].content});
+            }
+            else
+                throw std::runtime_error("invalid rule!");
         }
         Alg::SubsetAlg sa(g);
         st = std::move(sa.gen_state_tab().trim_tab());
@@ -328,7 +343,10 @@ namespace Lexer
             else
             {
                 if (pos_stac.empty())
-                    throw std::runtime_error("LexerGenerator::lex: Lexer Error");
+                {
+                    ReParser::print_line(str, pos);
+                    throw std::runtime_error(+" -> " + std::string(__FILE__) + ":" + std::to_string(__LINE__) + " LexerGenerator::lex(): Lexer Error");
+                }
                 auto [p, tok] = pos_stac.back();
                 // if a symbol is a keyword pr ignore
                 auto val = tok.val;
