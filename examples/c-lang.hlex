@@ -103,6 +103,8 @@ COMMA:;$
 QUE:?$
 # operand
 ADD:\+$
+INC:\+\+$
+DEC:\-\-$
 SUB:-$
 MUL: \*$
 DIV:/$

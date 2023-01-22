@@ -49,8 +49,8 @@ int main(int argc, char **argv)
 {
     try
     {
-        RE();
-        // gen_lexer(argc,argv);
+        // RE();
+        gen_lexer(argc,argv);
         // lex();
     }
     catch (std::exception &e)
