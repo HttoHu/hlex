@@ -1,0 +1,8 @@
+[S]:[E]<end>
+    ;
+# Hello
+[Expr]:[Term]<plus>[Expr] # Hey
+    ;
+[Term]:<int>
+    | <lp>[Expr]<rp>
+    ;

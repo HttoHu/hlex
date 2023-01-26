@@ -74,11 +74,9 @@ namespace ReParser
                 pos++;
                 if (pos == s.size())
                     throw std::runtime_error("ReParser::get_ch(): escape unexpect eof!");
+                // undefined escape char.
                 if (!escape_tab.count(s[pos]))
-                {
-                    print_line(s, pos);
-                    throw std::runtime_error(": ReParser::get_ch(): invalid escape!");
-                }
+                    return s[pos++];
                 return escape_tab[s[pos++]];
             }
             else

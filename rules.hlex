@@ -1,152 +1,17 @@
-[keywords]{
-    IF: if,
-    WHILE: while,
-    SWITCH:switch,
-    ELSE:else,
-    FOR:for,
-    DO:do,
-    SWITCH:switch,
-    DEFAULT:default,
-    CONTINUE:continue,
-    CASE:case,
-    GOTO:goto,
-    RETURN:return,
-    BREAK:break,
-    # types
-    VOID:void,
-    INT:int,
-    LONG:long,
-    SHORT:short,
-    SIGNED:signed,
-    REGISTER:register,
-    UNSIGNED: unsigned,
-    CHAR:char,
-    DOUBLE:double,
-    FLOAT:float,
-    STRUCT,struct,
-    ENUM,enum,
-    UNION:union,
-    STATIC:static,
-    TYPEDEF:typedef,
-    CONST:const,
-    VOLATILE:volatile
-}$
-
 [ignore]{
-    SPACE,ANNOTATION
+    space,annotation
 }$
-
-# Here is a simple string scanner. You need to define the LITERAL first.
-# The user_def function is (const std::string &s,int &pos) -> string, the tag of the token still remains and the value is what you returned.
-
-[user_def,LITERAL]{
-    pos++;
-    std::map<char, std::string> escape = {
-         {'n', "\n"}, {'t', "\t"}, {'r', "\r"}, {'\\', "\\"}, {'\'', "\\'"}, {'\"', "\""}};
-    std::string ret = "";
-    while (pos < s.size() && s[pos] != '\"')
-    {
-        if (s[pos] == '\\')
-        {
-            if (pos == s.size())
-                throw std::runtime_error("invalid string");
-            pos++;
-            if (!escape.count(s[pos]))
-                throw std::runtime_error("invalid escape string!");
-            ret += escape[s[pos]];
-        }
-        else
-            ret += s[pos];
-        pos++;
-    }
-    pos++;
-    return ret;
-}$
-[user_def,ANNOTATION]{
+[user_def,annotation]
+{
     while(pos<s.size() && s[pos]!='\n')
         pos++;
     return "";
 }$
-[user_def,CHAR_LIT]{
-    pos++;
-    std::map<char, std::string> escape = {
-        {'n', "\n"}, {'t', "\t"}, {'r', "\r"}, {'\\', "\\"}, {'\'', "\\'"}, {'\"', "\""}};
-    if (s[pos] == '\\')
-    {
-        pos++;
-        if (pos == s.size() || !escape.count(s[pos]))
-            throw std::runtime_error("invalid char");
-        else
-            return escape[s[pos++]];
-    }
-    // simple version
-    std::string ret = std::string(1, s[pos]);
-    pos++;
-    return ret;
-}$
-ANNOTATION://|#$
-
-NUMBER: [\+\-]?[0-9]+$
-LONG:[\+\-]?[0-9]+ll$
-REAL:[\+\-]?[0-9]+.[0-9]+$
-# LITERAL is scaned by user-define function. 
-
-LITERAL:"$
-CHAR_LIT:'$
-
-SYMBOL: [_a-zA-Z][_a-zA-Z0-9]*$
-DOT:.$
-MEM_VIS:->$
-COMMA:,$
-COLON::$
-COMMA:;$
-QUE:?$
-# operand
-ADD:\+$
-SUB:-$
-MUL: \*$
-DIV:/$
-LSH: <<$
-RSH: >>$
-MOD: %$
-BAND: &$
-BOR: \|$
-BXOR:^$
-BNOT:~$
-
-ASSIGN: =$
-SADD:\+=$
-SSUB:-=$
-SMUL:*=$
-SDIV:/=$
-SLSH: <<=$
-SRSH: >>=$
-SMOD: %=$
-SAND: &=$
-SOR: |=$
-SXOR: ^=$
-
-# compare operation 
-LT: <$
-GT: >$
-LE: <=$
-GE: >=$
-EQ: ==$
-NE: !=$
-
-# logical
-NOT: !$
-AND: &&$
-OR: \|\|$
-
-BEGIN :{$
-END :}$
-
-LPAR:\($
-RPAR:\)$
-LSP:\[$
-RSP:\]$
-
-# spaces 
-SPACE: \s|\t$
-NEWLINE:\r\n | \n$
+annotation: \#$
+nterminal:\[[A-Za-z0-9]+\]$
+terminal:<[a-z0-9A-Z]+>$
+or :\|$
+semi:;$
+colon::$
+space: \s|\t $
+newline :\n|\r\n$
