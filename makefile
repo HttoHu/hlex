@@ -1,4 +1,4 @@
-target = bin/lexer
+target = bin/hlex
 cc = g++ -g -std=c++17
 
 SRC= $(wildcard ./src/*.cpp)

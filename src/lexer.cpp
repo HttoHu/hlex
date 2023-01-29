@@ -16,7 +16,7 @@ namespace Lexer
         }
         std::string gen_constructor_header(int entry)
         {
-            return "Lexer::Lexer(const std::string &con):content(con),entry(" + std::to_string(entry) + "){\n";
+            return ":content(con),entry(" + std::to_string(entry) + "){\n";
         }
         template <typename T>
         std::string conv_to_liter(T t)
@@ -369,15 +369,21 @@ namespace Lexer
     }
     std::string LexerGenerator::gen_code(const std::string &temp_path)
     {
-        std::string ret = Utils::read_file(temp_path) + "\n" + gen_header() + gen_constructor_header(st.entry);
+        std::string ret = Utils::read_file(temp_path);
+        std::string tail;
+        while (ret.back() != '$')
+            tail += ret.back(), ret.pop_back();
+        ret.pop_back();
+        ret += gen_constructor_header(st.entry);
         ret += "fin_stat_tab = " + gen_tab(st.fin_stat_tab) + ";\n";
         ret += "tab = " + gen_vec<std::map<char, int>>(st.tab, gen_tab<char, int>) + ";\n";
         ret += "ignore = " + gen_set(ignore) + ";\n";
         ret += "keywords = " + gen_tab(keywords) + ";\n";
         ret += "user_defs = " + gen_tab2<std::string, std::string>(user_def, gen_func) + ";\n";
 
-        ret += "}}";
-        return ret;
+        ret += "}\n";
+        std::reverse(tail.begin(),tail.end());
+        return ret + tail;
     }
     // end LexerGenerator
 

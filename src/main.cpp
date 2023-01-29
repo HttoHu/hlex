@@ -6,31 +6,37 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <cstring>
 
 namespace Utils
 {
     std::string read_file(const std::string &filename);
 }
 char buf[1024];
+
+std::string cur_dir(char *path)
+{
+    int len = strlen(path);
+    int end_pos = len - 1;
+    while (end_pos && path[end_pos] != '\\' && path[end_pos] != '/')
+        end_pos--;
+    return std::string(path, path + end_pos);
+}
 void gen_lexer(int argc, char **argv)
 {
     using namespace Alg;
 
     if (argc != 3)
     {
-        std::cerr << "invalid argument, usage: hlex [input] [output]\n";
+        std::cerr << "invalid argument, usage: hlex [rule] [output]\n";
         exit(1);
     }
-    auto dir = std::filesystem::canonical(std::filesystem::path(argv[0])).parent_path().c_str();
-    sprintf(buf, "%S", dir);
-    std::string exe_path = buf;
-
+    std::string exe_path = cur_dir(argv[0]);
     std::string file = Utils::read_file(argv[1]);
     Lexer::Scanner scan(file);
     Lexer::LexerGenerator L(scan);
-
-    std::ofstream ofs(argv[1]);
-    ofs << L.gen_code(exe_path+"/hlex/template.cpp");
+    std::ofstream ofs(argv[2]);
+    ofs << L.gen_code(exe_path + "/hlex/template.txt");
     ofs.close();
 }
 void lex()
