@@ -2,3 +2,4 @@ bin/*
 obj/*
 output/tmp.cpp
 output/tmp.exe
+test/*

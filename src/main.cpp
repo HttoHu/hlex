@@ -28,7 +28,7 @@ void gen_lexer(int argc, char **argv)
 
     if (argc != 3)
     {
-        std::cerr << "invalid argument, usage: hlex [rule] [output]\n";
+        std::cerr << "invalid argument, usage: hlex [rules] [output]\n";
         exit(1);
     }
     std::string exe_path = cur_dir(argv[0]);
@@ -37,6 +37,17 @@ void gen_lexer(int argc, char **argv)
     Lexer::LexerGenerator L(scan);
     std::ofstream ofs(argv[2]);
     ofs << L.gen_code(exe_path + "/hlex/template.txt");
+    ofs.close();
+}
+void gen_lexer()
+{
+    using namespace Alg;
+
+    std::string file = Utils::read_file("./rules.hlex");
+    Lexer::Scanner scan(file);
+    Lexer::LexerGenerator L(scan);
+    std::ofstream ofs("./output/test.h");
+    ofs << L.gen_code("./template/template.txt");
     ofs.close();
 }
 void lex()
@@ -59,9 +70,11 @@ int main(int argc, char **argv)
 {
     try
     {
-        // RE();
+#ifdef DEBUG
+        gen_lexer();
+#else
         gen_lexer(argc, argv);
-        // lex();
+#endif
     }
     catch (std::exception &e)
     {

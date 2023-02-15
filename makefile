@@ -17,6 +17,7 @@ hopcroft_dep = subset-cons.h
 parser_dep = parser.h subset-cons.h
 re_dep = re.h parser.h
 lexer_dep = lexer.h parser.h
+
 all:$(target)
 
 obj/main.o:$(addprefix ./src/, main.cpp) $(addprefix includes/,$(main_dep))
@@ -35,7 +36,7 @@ obj/re.o: src/re.cpp $(addprefix includes/, $(re_dep))
 	$(COM_INS)
 obj/lexer.o: src/lexer.cpp $(addprefix includes/, $(lexer_dep))
 	$(COM_INS)
-obj/utils.o: src/utils.cpp
+obj/utils.o: src/utils.cpp $(addprefix includes/, utils.h)
 	$(COM_INS)
 	
 $(target):$(OBJ)

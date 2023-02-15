@@ -1,4 +1,5 @@
 #include "../includes/lexer.h"
+#include "../includes/utils.h"
 #include <functional>
 
 namespace Utils
@@ -78,6 +79,19 @@ namespace Lexer
             ret.back() = '}';
             return ret;
         }
+        template <typename K, typename V>
+        std::string gen_tab3(const std::map<K, V> &mp, std::function<std::string(K, V)> f)
+        {
+            if (mp.empty())
+                return "{}";
+            std::string ret = "{";
+            for (auto [k, v] : mp)
+            {
+                ret += "{" + f(k, v) + "},";
+            }
+            ret.back() = '}';
+            return ret;
+        }
         template <typename V>
         std::string gen_set(const std::set<V> &s)
         {
@@ -86,6 +100,17 @@ namespace Lexer
             std::string ret = "{";
             for (auto v : s)
                 ret += conv_to_liter(v) + ",";
+            ret.back() = '}';
+            return ret;
+        }
+        template <typename V>
+        std::string gen_set(const std::set<V> &s, std::function<std::string(V)> f)
+        {
+            if (s.empty())
+                return "{}";
+            std::string ret = "{";
+            for (auto v : s)
+                ret += f(v) + ",";
             ret.back() = '}';
             return ret;
         }
@@ -102,9 +127,9 @@ namespace Lexer
             return ret;
         }
 
-        std::string gen_func(const std::string &func)
+        std::string gen_func(const std::string &key, const std::string &func)
         {
-            std::string ret = "[](const std::string &s,int &pos)" + func;
+            std::string ret = key + ",[](const std::string &s,int &pos)" + func;
             return ret;
         }
     }
@@ -222,7 +247,7 @@ namespace Lexer
             skip();
             ret.content = read_to_dollar();
         }
-        else if (cur_ch = '[')
+        else if (cur_ch == '[')
         {
             match('[');
             std::string keyword = read_word();
@@ -279,6 +304,8 @@ namespace Lexer
             if (rules[i].kind == RuleLine::RE)
             {
                 std::cout << "Read RE " << rules[i].symbol << " -- " << rules[i].content << "\n";
+                tags.push_back(rules[i].symbol);
+
                 auto cur_graph = ReParser::parser(rules[i].content);
                 // attach tag
                 cur_graph->traverse_graph([&](Alg::Node *n)
@@ -294,6 +321,8 @@ namespace Lexer
                 std::cout << "Read KEYWORDS\n";
 
                 keywords.insert(rules[i].specify_tab.begin(), rules[i].specify_tab.end());
+                for (auto keyword : rules[i].specify_tab)
+                    tags.push_back(keyword.second);
             }
             else if (rules[i].kind == RuleLine::IGNORE)
             {
@@ -369,21 +398,27 @@ namespace Lexer
     }
     std::string LexerGenerator::gen_code(const std::string &temp_path)
     {
-        std::string ret = Utils::read_file(temp_path);
-        std::string tail;
-        while (ret.back() != '$')
-            tail += ret.back(), ret.pop_back();
-        ret.pop_back();
-        ret += gen_constructor_header(st.entry);
-        ret += "fin_stat_tab = " + gen_tab(st.fin_stat_tab) + ";\n";
-        ret += "tab = " + gen_vec<std::map<char, int>>(st.tab, gen_tab<char, int>) + ";\n";
-        ret += "ignore = " + gen_set(ignore) + ";\n";
-        ret += "keywords = " + gen_tab(keywords) + ";\n";
-        ret += "user_defs = " + gen_tab2<std::string, std::string>(user_def, gen_func) + ";\n";
+        using namespace Utils;
 
-        ret += "}\n";
-        std::reverse(tail.begin(),tail.end());
-        return ret + tail;
+        std::string ret = read_file(temp_path);
+        Slicer slicer(ret);
+        //
+        auto equiv_f = [](const std::string &s)
+        { return s; };
+        // key to string, val as tag
+
+        slicer.get_mut("tag_str_tab") = gen_vec<std::string>(tags, [](const std::string &s)
+                                                             { return "{" + s + "," + conv_to_liter(s) + "}"; });
+        slicer.get_mut("entry") = std::to_string(st.entry);
+        slicer.get_mut("enum") = gen_vec<std::string>(tags, equiv_f);
+        slicer.get_mut("fin_stat_tab") = gen_tab2<int, std::string>(st.fin_stat_tab, equiv_f);
+        slicer.get_mut("tab") = gen_vec<std::map<char, int>>(st.tab, gen_tab<char, int>);
+        slicer.get_mut("ignore") = gen_set<std::string>(ignore, equiv_f);
+        slicer.get_mut("keywords") = gen_tab3<std::string, std::string>(keywords, [](const std::string &k, const std::string &v)
+                                                                        { return conv_to_liter(k) + "," + v; });
+        slicer.get_mut("user_defs") = gen_tab3<std::string, std::string>(user_def, gen_func);
+
+        return slicer.merge();
     }
     // end LexerGenerator
 

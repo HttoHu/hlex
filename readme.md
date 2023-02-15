@@ -20,7 +20,6 @@
 3. write a rule file, and every rule ended with $
 
    there are four type rules: 
-
    * keywords: The hlex can not distinct keywords from symbols, so you need to specify them.
    * ignore: Some tokens are useless for following phases, you can ignore it.
    * user_def: You can define your method to scan special tokens which the DFA is difficult to process. 
@@ -98,7 +97,7 @@ RPAR:\)$
 SPACE: \s|\t$
 NEWLINE:\n$
 ```
-4. run `./bin/lexer [output-path]` to generate your lexer   
+4. run `./bin/lexer [rule-file] [output-path]` to generate your lexer   
 5. add the main function to test
 
 ```cpp
@@ -106,11 +105,11 @@ namespace HLex...
 
 int main()
 {
-    HLex::Lexer L(HLex::read_file("test.txt"));
+    HLex::Lexer L(read_file("test.txt"));
     auto vec = L.lex();
     for (auto item : vec)
     {
-        std::cout << item.to_string();
+        std::cout << "<" + L.tag_to_str(item.tag) << "," << item.val << ">";
     }
 }
 ```
@@ -128,25 +127,29 @@ int max(int a,int b)
 }
 
 OUTPUT:
-<SYMBOL,int><SYMBOL,max><LPAR,(><SYMBOL,int><SYMBOL,a><COMMA,,><SYMBOL,int><SYMBOL,b><RPAR,)><NEWLINE,
+<INT,int><SYMBOL,max><LPAR,(><INT,int><SYMBOL,a><COMMA,,><INT,int><SYMBOL,b><RPAR,)><NEWLINE,
 ><BEGIN,{><NEWLINE,
 ><IF,if><LPAR,(><SYMBOL,a><GT,>><SYMBOL,b><RPAR,)><NEWLINE,
-><SYMBOL,return><SYMBOL,a><COMMA,;><NEWLINE,
-><SYMBOL,return><SYMBOL,b><COMMA,;><NEWLINE,
+><RETURN,return><SYMBOL,a><SEMI,;><NEWLINE,
+><RETURN,return><SYMBOL,b><SEMI,;><NEWLINE,
 ><END,}>
-
 //===========================test-case 2==========================================
 INPUT:
 // this is an ANNOTATION. the output will ignore me
 int a = 3.1415+1ull-1ll+"hello World\n";
 
 OUTPUT:
-<NEWLINE,
-><SYMBOL,int><SYMBOL,a><ASSIGN,=><REAL,3.1415><ADD,+><NUMBER,1><SYMBOL,ull><SUB,-><LONG,1ll><ADD,+><LITERAL,hello World
-><COMMA,;>
+<INT,int><SYMBOL,a><ASSIGN,=><REAL,3.1415><NUMBER,+1><SYMBOL,ull><LONG_NUMBER,-1ll><ADD,+><LITERAL,hello World
+><SEMI,;><NEWLINE,
+>
 ```
 
-
+## Update Log
+v2.0 
+* 生成的Lexer 使用 enum 作为 tag 而不是字符串
+* 修复了许多bug
+* 修改了模版
+* 修改了examples中c-lang.hlex 的部分错误
 
 ## hlex principle
 构造一个自动的词法分析器，能够分析如下规则的正则表达式

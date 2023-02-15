@@ -57,9 +57,10 @@ namespace Lexer
 
     private:
         std::map<std::string, std::string> keywords;
-        std::map<std::string,std::string> user_def;
+        std::map<std::string, std::string> user_def;
         std::set<std::string> ignore;
         std::vector<RuleLine> rules;
+        std::vector<std::string> tags;
         Alg::StateTable st;
     };
 }

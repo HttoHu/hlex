@@ -33,7 +33,7 @@
 }$
 
 [ignore]{
-    SPACE,ANNOTATION
+    SPACE,ANNOTATION,NEWLINE
 }$
 
 # Here is a simple string scanner. You need to define the LITERAL first.
@@ -87,7 +87,7 @@
 ANNOTATION://|#$
 
 NUMBER: [\+\-]?[0-9]+$
-LONG:[\+\-]?[0-9]+ll$
+LONG_NUMBER:[\+\-]?[0-9]+ll$
 REAL:[\+\-]?[0-9]+.[0-9]+$
 # LITERAL is scaned by user-define function. 
 
@@ -97,9 +97,9 @@ CHAR_LIT:'$
 SYMBOL: [_a-zA-Z][_a-zA-Z0-9]*$
 DOT:.$
 MEM_VIS:->$
-COMMA:,$
 COLON::$
-COMMA:;$
+COMMA:,$
+SEMI:;$
 QUE:?$
 # operand
 ADD:\+$
@@ -115,7 +115,6 @@ BAND: &$
 BOR: \|$
 BXOR:^$
 BNOT:~$
-
 ASSIGN: =$
 SADD:\+=$
 SSUB:-=$
@@ -127,7 +126,6 @@ SMOD: %=$
 SAND: &=$
 SOR: |=$
 SXOR: ^=$
-
 # compare operation 
 LT: <$
 GT: >$
