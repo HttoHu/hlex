@@ -1,5 +1,5 @@
 target = bin/hlex
-cc = g++ -g -std=c++17
+cc = g++ -O2 -std=c++17
 
 SRC= $(wildcard ./src/*.cpp)
 OBJ= $(addprefix obj/,$(patsubst %.cpp,%.o,$(notdir $(SRC))))

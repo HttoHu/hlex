@@ -12,9 +12,9 @@ namespace HLex
     using std::map;
     using std::vector;
     using char_type = char;
-    enum Tag $enum;
+    enum Tag {PLUS,MINUS,MUL,INT};
     std::string tag_to_str(Tag tag){
-        static map<Tag,std::string> mp = $tag_str_tab;
+        static map<Tag,std::string> mp = {{PLUS,"PLUS"},{MINUS,"MINUS"},{MUL,"MUL"},{INT,"INT"}};
         return mp[tag];
     }
     struct Token
@@ -28,12 +28,12 @@ namespace HLex
     public:
         Lexer(const std::string &con):content(con)
         {
-            entry = $entry;
-            fin_stat_tab = $fin_stat_tab;
-            tab = $tab;
-            ignore = $ignore;
-            keywords = $keywords;
-            user_defs = $user_defs;
+            entry = 0;
+            fin_stat_tab = {{1,INT},{2,MINUS},{3,MUL},{4,PLUS}};
+            tab = {{{'*',3},{'+',4},{'-',2},{'0',1},{'1',1},{'2',1},{'3',1},{'4',1},{'5',1},{'6',1},{'7',1},{'8',1},{'9',1}},{{'0',1},{'1',1},{'2',1},{'3',1},{'4',1},{'5',1},{'6',1},{'7',1},{'8',1},{'9',1}},{},{},{}};
+            ignore = {};
+            keywords = {};
+            user_defs = {};
         }
         std::vector<Token> lex()
         {
