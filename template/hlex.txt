@@ -26,7 +26,7 @@ namespace HLex
     class Lexer
     {
     public:
-        Lexer(const std::string &con):content(con)
+        Lexer()
         {
             entry = $entry;
             fin_stat_tab = $fin_stat_tab;
@@ -35,7 +35,7 @@ namespace HLex
             keywords = $keywords;
             user_defs = $user_defs;
         }
-        std::vector<Token> lex()
+        std::vector<Token> lex(const std::string &content)
         {
             std::vector<Token> ret;
             int cur_state = entry;
@@ -104,7 +104,6 @@ namespace HLex
         }
 
     private:
-        std::string content;
         int pos = 0;
         std::map<std::string, Tag> keywords;
         std::map<Tag, std::function<std::string(const std::string &, int &)>> user_defs;

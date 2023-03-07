@@ -1,5 +1,9 @@
-PLUS: \+$
-MINUS: -$
-MUL:\*$
-INT:[0-9]+$ 
- 
+[ignore]{
+    SPACE
+}$
+SPACE:\s|\t$
+ADD:\+$
+SUB:-$
+MUL:*$
+DIV:/$
+INT:[0-9]+$

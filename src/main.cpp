@@ -36,7 +36,7 @@ void gen_lexer(int argc, char **argv)
     Lexer::Scanner scan(file);
     Lexer::LexerGenerator L(scan);
     std::ofstream ofs(argv[2]);
-    ofs << L.gen_code(exe_path + "/htemp/hlex.txt");
+    ofs << L.gen_code(exe_path + "/template/hlex.txt");
     ofs.close();
 }
 void gen_lexer()
