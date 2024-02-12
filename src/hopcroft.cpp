@@ -78,6 +78,7 @@ namespace Alg
                     ret.tab[new_state][ch] = old_new_tab[dest];
                 }
             }
+            return ret;
         }
 
         void split_different_tag(unordered_map<DS::BitSet, int, DS::BitSetHash> &new_states_tab,
