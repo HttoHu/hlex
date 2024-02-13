@@ -8,16 +8,10 @@
 
     std::cout << res.start << " " << res.str << "\n";
 ```
+
 ## Lexer Usage 
-1. `make` to build the project to test
-2. include `includes/lexer.h` 
-```cpp
-    std::string file = read_file("./rules.hlex"); // rule file
-    Lexer::Scanner scan(file);
-    Lexer::LexerGenerator L(scan);
-    auto vec = L.lex("some strings you want to scan");
-```
-3. write a rule file, and every rule ended with $
+1. `make` to build the project to test, the target binary will generated into `bin/hlex`
+2. write a rule file, and every rule ended with $
 
    there are four type rules: 
    * keywords: The hlex can not distinct keywords from symbols, so you need to specify them.

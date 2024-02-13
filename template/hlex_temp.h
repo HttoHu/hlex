@@ -1,3 +1,4 @@
+std::string temp_raw=R"(
 #pragma once
 #include <iostream>
 #include <string>
@@ -114,3 +115,4 @@ namespace HLex
         vector<map<char_type, int>> tab;
     };
 }
+)";

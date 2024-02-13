@@ -7,6 +7,8 @@
 #include <fstream>
 #include <filesystem>
 #include <cstring>
+// to get template raw string.
+#include "../template/hlex_temp.h"
 
 namespace Utils
 {
@@ -36,7 +38,7 @@ void gen_lexer(int argc, char **argv)
     Lexer::Scanner scan(file);
     Lexer::LexerGenerator L(scan);
     std::ofstream ofs(argv[2]);
-    ofs << L.gen_code(exe_path + "/template/hlex.txt");
+    ofs << L.gen_code(temp_raw);
     ofs.close();
 }
 void gen_lexer()

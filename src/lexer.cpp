@@ -396,12 +396,11 @@ namespace Lexer
             ret.push_back(pos_stac.back().second);
         return ret;
     }
-    std::string LexerGenerator::gen_code(const std::string &temp_path)
+    std::string LexerGenerator::gen_code(const std::string &temp_file)
     {
         using namespace Utils;
 
-        std::string ret = read_file(temp_path);
-        Slicer slicer(ret);
+        Slicer slicer(temp_file);
         //
         auto equiv_f = [](const std::string &s)
         { return s; };
